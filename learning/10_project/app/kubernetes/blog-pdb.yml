@@ -1,0 +1,14 @@
+kind: PodDisruptionBudget
+apiVersion: policy/v1
+
+metadata:
+  name: blog-pdb
+  namespace: blog-app
+
+spec:
+  minAvailable: 1
+
+  selector:
+    matchLabels:
+      app: blog-app
+      tier: backend

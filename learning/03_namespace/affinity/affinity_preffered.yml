@@ -1,0 +1,22 @@
+kind: Pod
+apiVersion: v1
+metadata: 
+  name: preffered-affinity
+spec:
+  affinity:
+    nodeAffinity:
+
+      preferredDuringSchedulingIgnoredDuringExecution:
+
+      - weight: 1
+        preference:
+          matchExpressions:
+
+          - key: disk
+            operator: In
+            values: 
+            - ssd
+
+  containers:
+  - name: nginx
+    image: nginx

@@ -1,0 +1,11 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: admin-service
+  namespace: ingress-demo
+spec:
+  selector:
+    app: admin
+  ports:
+  - port: 80
+    targetPort: 5678

@@ -1,0 +1,17 @@
+kind: Pod
+apiVersion: v1
+metadata: 
+  name: nginx-exec
+spec:
+  containers:
+  - name: nginx
+    image: nginx:latest
+
+    livenessProbe:
+      exec: 
+        command:
+        - cat
+        - /usr/share/nginx/html/index.html
+
+      initialDelaySeconds: 5
+      periodSeconds: 5

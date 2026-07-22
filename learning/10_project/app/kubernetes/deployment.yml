@@ -1,0 +1,30 @@
+kind: Deployment
+apiVersion: apps/v1
+
+metadata: 
+  name: blog-deployment
+  namespace: blog-app
+  labels:
+    app: blog
+
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: blog-app
+      tier: backend
+
+  template:
+    metadata:
+      labels:
+        app: blog-app
+        tier: backend
+    
+    spec:
+      containers: 
+      - name: kube-container
+        image: kube-container:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 8000
+

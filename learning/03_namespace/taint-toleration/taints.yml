@@ -1,0 +1,9 @@
+kind: Pod
+apiVersion: v1
+metadata: 
+  name: taint-node
+spec:
+  nodeName: kind-cluster-worker3
+  containers:
+  - name: taint-node
+    image: nginx 

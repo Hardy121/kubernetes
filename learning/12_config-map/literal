@@ -1,0 +1,9 @@
+kubectl create configmap app-config \
+  --from-literal=APP_NAME=blog \
+  --from-literal=APP_ENV=development \
+  --from-literal=DB_HOST=mongodb-service
+
+
+
+
+kubectl get configmap app-config -o jsonpath='{.data.APP_NAME}'

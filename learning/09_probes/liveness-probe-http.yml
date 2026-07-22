@@ -1,0 +1,18 @@
+kind: Pod
+apiVersion: v1
+metadata: 
+  name: nginx-liveness
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    ports:
+    - containerPort: 80
+
+    livenessProbe:
+      httpGet:
+        path: /health
+        port: 80
+
+      initialDelaySeconds: 5
+      periodSeconds: 5

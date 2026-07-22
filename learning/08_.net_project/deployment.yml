@@ -1,0 +1,22 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata: 
+  name: notes-app-deployment
+  labels:  
+    app: notes
+  namespace: nginx
+spec: 
+  replicas: 1
+  selector: 
+    matchLabels:
+      app: notes-app
+  template:
+    metadata:
+      labels:
+        app: notes-app
+    spec:
+      containers: 
+      - name: notes-app-container
+        image: hardik002/notes-app-k8s:latest
+        ports:
+        - containerPort: 8000

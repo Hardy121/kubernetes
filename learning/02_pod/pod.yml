@@ -1,0 +1,18 @@
+kind: Pod
+apiVersion: v1
+metadata: 
+  name: nginx-pod-3
+  namespace: nginx
+  metadata:
+  labels:
+    app: nginx
+    env: production
+    owner: devops
+    teams: payment
+spec:
+  nodeName: kind-cluster-worker2
+  containers:
+  - name: nginx
+    image: nginx:latest
+    ports:
+    - containerPort: 80

@@ -1,0 +1,25 @@
+kind: Job
+apiVersion: batch/v1
+metadata:
+  name: job-backoff-limit
+spec:
+  completions: 10
+  parallelism: 3
+  completionMode: Indexed
+  backoffLimitPerIndex: 1
+  maxFailedIndexes: 5
+  template: 
+    spec: 
+      restartPolicy: Never
+      containers:
+      - name: example
+        image: python
+        command:
+        - python3
+        - -c
+        - |
+          import os, sys
+          print("Hello world")
+          if int(os.environ.get("JOB_COMPLETION_INDEX")) % 2 == 0:
+            sys.exit(1)
+

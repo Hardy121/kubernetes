@@ -1,0 +1,20 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: cpu-test
+  namespace: blog-app
+
+spec:
+  containers:
+    - name: cpu
+      image: polinux/stress
+
+      resources:
+        requests:
+          cpu: "100m"
+        limits:
+          cpu: "500m"
+
+      args:
+        - "--cpu"
+        - "2"

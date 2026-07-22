@@ -1,0 +1,30 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata: 
+  name: max-unavailable
+  labels:
+    strategy: rolling-update
+    maxUnavailable: one
+
+spec:
+  strategy: 
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1 
+      maxSurge: 2
+  replicas: 4
+  selector:
+    matchLabels:
+      strategy: rolling-pod
+  
+  template:
+    metadata:
+      labels:
+        strategy: rolling-pod
+    spec:
+      containers:
+      - name: rolling-container
+        image: nginx
+        ports:
+        - containerPort: 80
+      

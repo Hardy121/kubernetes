@@ -1,0 +1,21 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: nginx-pvc
+  namespace: default
+
+spec:
+  volumes:
+    - name: storage
+      persistentVolumeClaim: 
+        claimName: demo-pvc
+
+  containers:
+    - name: nginx
+      image: nginx
+
+      volumeMounts:
+        - name: storage
+          mountPath: /data
+
+

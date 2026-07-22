@@ -1,0 +1,14 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  creationTimestamp: "2024-02-28T22:30:44Z"
+  generateName: frontend-
+  labels:
+    tier: frontend-diffOwner
+  name: frontend
+  ownerReferences:
+  - apiVersion: apps/v1
+    controller: true
+    kind: ReplicaSet
+    name: frontend
+    uid: e129deca-f864-481b-bb16-b27abfd92292

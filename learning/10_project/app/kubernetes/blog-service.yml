@@ -1,0 +1,17 @@
+kind: Service
+apiVersion: v1
+
+metadata:
+  name: blog-service
+  namespace: blog-app
+
+spec: 
+  selector:
+    app: blog-app
+
+  ports:
+    - port: 8000
+      targetPort: 8000
+
+  type: ClusterIP 
+

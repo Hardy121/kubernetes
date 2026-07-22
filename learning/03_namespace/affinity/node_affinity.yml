@@ -1,0 +1,27 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: node-affinity
+spec:
+  affinity:
+    nodeAffinity:
+
+      requiredDuringSchedulingIgnoredDuringExecution:
+        
+        nodeSelectorTerms:
+
+        - matchExpressions:
+
+          - key: disk
+            operator: In
+            values:
+            - ssd
+          
+          - key: os
+            operator: In
+            values:
+            - window
+
+  containers:
+  - name: nginx
+    image: nginx

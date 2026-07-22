@@ -1,0 +1,11 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: client-service
+  namespace: ingress-demo
+spec:
+  selector:
+    app: client
+  ports:
+  - port: 80
+    targetPort: 5678

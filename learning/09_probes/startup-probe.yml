@@ -1,0 +1,24 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: startup-probe-demo
+
+spec:
+  containers: 
+  - name: nginx
+    image: nginx
+    
+    command:
+      - /bin/sh
+      - -c
+      - |
+         sleep 30
+         nginx -g "daemon off;"
+
+    startupProbe:
+      httpGet:
+        path: /
+        port: 80
+      periodSeconds: 5
+      failureThreshold: 4
+

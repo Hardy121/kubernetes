@@ -1,0 +1,10 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: frontend
+  labels:
+    tier: frontend
+spec:
+  containers:
+  - name: php-redis
+    image: us-docker.pkg.dev/google-samples/containers/gke/gb-frontend:v5

@@ -1,0 +1,17 @@
+kind: Service
+apiVersion: v1
+
+metadata:
+  name: mongodb-service
+  namespace: blog-app
+
+spec:
+  selector:
+    app: mongodb
+    tier: database
+  
+  ports:
+    - port: 27017
+      targetPort: 27017
+
+  type: ClusterIP
