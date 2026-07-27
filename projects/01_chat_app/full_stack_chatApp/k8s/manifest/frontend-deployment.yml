@@ -27,4 +27,6 @@ spec:
           env:
           - name: NODE_ENV
             value: production
+          - name: MODE
+            value: production
     
