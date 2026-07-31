@@ -1,0 +1,111 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: backend
+  namespace: chat-app
+spec:
+  selector:
+    app: chat-app
+    tier: backend
+  ports:
+    - protocol: TCP
+      port: 5001  
+      targetPort: 5001
+  type: ClusterIP  
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backend-secret
+  namespace: chat-app
+type: Opaque
+stringData:
+  PORT: "5001"
+  MONGODB_URI: mongodb://admin:admin123@mongodb-service:27017/chatApp?authSource=admin&retryWrites=true&w=majority 
+  JWT_SECRET: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE1MTYyNDI2MjJ9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  backend
+  namespace: chat-app
+  labels:
+    app:  chat-app
+    tier: backend
+spec:
+  selector:
+    matchLabels:
+        app: chat-app
+        tier: backend
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: chat-app
+        tier: backend
+    spec:
+      # initContainers:
+        # Init containers are exactly like regular containers, except:
+          # - Init containers always run to completion.
+          # - Each init container must complete successfully before the next one starts.
+      containers:
+      - name:  backend
+        image:  hardik002/chatapp-backend:latest
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 100m
+            memory: 100Mi
+        livenessProbe:
+          tcpSocket:
+            port: 5001
+          initialDelaySeconds: 5
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5001
+          initialDelaySeconds: 5
+          timeoutSeconds: 2
+          successThreshold: 1
+          failureThreshold: 3
+          periodSeconds: 10
+        env:
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: backend-secret
+              key: PORT
+        - name: MONGODB_URI
+          valueFrom:  
+            configMapKeyRef:
+              name: backend-secret
+              key: MONGODB_URI
+        - name: JWT_SECRET
+          valueFrom:  
+            configMapKeyRef:
+              name: backend-secret
+              key: JWT_SECRET
+        ports:
+        - containerPort:  5001
+          name:  backend
+        volumeMounts:
+        - name: localtime
+          mountPath: /etc/localtime
+      volumes:
+        - name: localtime
+          hostPath:
+            path: /usr/share/zoneinfo/Asia/Shanghai
+      restartPolicy: Always

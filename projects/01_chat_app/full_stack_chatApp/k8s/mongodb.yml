@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-service
+  namespace: chat-app
+
+spec:
+  selector:
+    app: chat-app
+    tier: database
+  ports:
+    - protocol: TCP
+      port:  27017
+      targetPort: 27017
+  type: ClusterIP
+  
+---
+
+kind: Secret
+apiVersion: v1
+metadata: 
+  name: mongodb-secret
+  namespace: chat-app
+type: Opaque
+data: 
+  username: YWRtaW4=
+  password: YWRtaW4xMjM=
+
+
+
+---
+
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: mongodb
+  namespace: chat-app 
+  labels:
+    app: chat-app
+    tier: database
+
+spec:
+  replicas: 2
+  serviceName: mongodb-service
+  minReadySeconds: 10 
+  selector: 
+    matchLabels:
+      app: chat-app
+      tier: database
+  
+  template:
+    metadata:
+      labels:
+        app: chat-app
+        tier: database
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: mongodb
+          image: mongo:latest
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongodb
+              mountPath: /data/db
+          env:
+            - name: MONGODB_USERNAME
+              valueFrom: 
+                secretKeyRef: 
+                  name: mongodb-secret
+                  key: username
+            - name: MONGODB_PASSWORD
+              valueFrom: 
+                secretKeyRef: 
+                  name: mongodb-secret
+                  key: password
+          
+  volumeClaimTemplates:
+    - metadata: 
+        name: mongodb
+      spec:
+        accessModes: ["ReadWriteOnce"] 
+        resources:
+          requests:
+            storage: 1Gi 
+    
