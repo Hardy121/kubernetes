@@ -40,7 +40,7 @@ metadata:
     tier: database
 
 spec:
-  replicas: 2
+  replicas: 1
   serviceName: mongodb-service
   minReadySeconds: 10 
   selector: 
@@ -63,17 +63,17 @@ spec:
           volumeMounts:
             - name: mongodb
               mountPath: /data/db
-          env:
-            - name: MONGODB_USERNAME
-              valueFrom: 
-                secretKeyRef: 
-                  name: mongodb-secret
-                  key: username
-            - name: MONGODB_PASSWORD
-              valueFrom: 
-                secretKeyRef: 
-                  name: mongodb-secret
-                  key: password
+          # env:
+          #   - name: MONGO_INITDB_ROOT_USERNAME
+          #     valueFrom: 
+          #       secretKeyRef: 
+          #         name: mongodb-secret
+          #         key: username
+          #   - name: MONGO_INITDB_ROOT_PASSWORD
+          #     valueFrom: 
+          #       secretKeyRef: 
+          #         name: mongodb-secret
+          #         key: password
           
   volumeClaimTemplates:
     - metadata: 

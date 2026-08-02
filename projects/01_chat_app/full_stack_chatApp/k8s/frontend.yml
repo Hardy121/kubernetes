@@ -27,19 +27,25 @@ spec:
 
 --- 
 
-
-
-
-
-
-
+apiVersion: v1
+kind: Secret
+metadata:
+  name: frontend-secret
+  namespace: chat-app
+type: Opaque
+stringData:
+  MODE: production
+  NODE_ENV: production
+  # Example:
+  # password: {{ .Values.password | b64enc }}
+  
 --- 
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name:  frontend
-  namespace: default
+  namespace: chat-app
   labels:
     app:  chat-app
     tier: frontend
@@ -82,12 +88,17 @@ spec:
           successThreshold: 1
           failureThreshold: 3
           periodSeconds: 10
-        # env:
-        # - name: DB_HOST
-        #   valueFrom:
-        #     configMapKeyRef:
-        #       name: chat-app
-        #       key: DB_HOST
+        env:
+        - name: MODE
+          valueFrom:
+            secretKeyRef:
+              name: frontend-secret
+              key: MODE
+        - name: NODE_ENV
+          valueFrom:
+            secretKeyRef:
+              name: frontend-secret
+              key: NODE_ENV
         ports:
         - containerPort:  80
           name:  chat-app
