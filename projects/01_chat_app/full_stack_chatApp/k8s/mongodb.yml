@@ -54,6 +54,15 @@ spec:
         app: chat-app
         tier: database
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: storage
+                operator: In
+                values:
+                - ssd
       terminationGracePeriodSeconds: 10
       containers:
         - name: mongodb
@@ -63,18 +72,23 @@ spec:
           volumeMounts:
             - name: mongodb
               mountPath: /data/db
-          # env:
-          #   - name: MONGO_INITDB_ROOT_USERNAME
-          #     valueFrom: 
-          #       secretKeyRef: 
-          #         name: mongodb-secret
-          #         key: username
-          #   - name: MONGO_INITDB_ROOT_PASSWORD
-          #     valueFrom: 
-          #       secretKeyRef: 
-          #         name: mongodb-secret
-          #         key: password
-          
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom: 
+                secretKeyRef: 
+                  name: mongodb-secret
+                  key: username
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom: 
+                secretKeyRef: 
+                  name: mongodb-secret
+                  key: password
+       #  Node affinity is a set of rules used by the scheduler to determine where a pod can be placed in the cluster. It allows you to specify constraints on the nodes that a pod can be scheduled on based on labels, topology, or other node attributes. Node affinity can be used to ensure that pods are scheduled on specific types of nodes, such as those with certain hardware characteristics or geographic locations.
+      tolerations:
+        - key: "ssd"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
   volumeClaimTemplates:
     - metadata: 
         name: mongodb
@@ -84,3 +98,26 @@ spec:
           requests:
             storage: 1Gi 
     
+---
+
+kind: PodDisruptionBudget
+apiVersion: policy/v1
+metadata:
+  name: mongodb-pdb
+  namespace: chat-app
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: chat-app
+      tier: database 
+
+--- 
+
+kind: PriorityClass
+apiVersion: scheduling.k8s.io/v1
+metadata:
+  name: mongodb-priority
+value: 1000
+globalDefault: false
+description: "Priority class for MongoDB pods"
