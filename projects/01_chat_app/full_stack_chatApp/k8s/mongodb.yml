@@ -1,3 +1,5 @@
+# kubectl taint nodes <node-name> ssd=true:NoSchedule
+# kubectl label nodes <node-name> storage=ssd
 apiVersion: v1
 kind: Service
 metadata:
@@ -64,9 +66,10 @@ spec:
                 values:
                 - ssd
       terminationGracePeriodSeconds: 10
+      priorityClassName: mongodb-priority
       containers:
         - name: mongodb
-          image: mongo:latest
+          image: mongo:8.0
           ports:
             - containerPort: 27017
           volumeMounts:
@@ -121,3 +124,92 @@ metadata:
 value: 1000
 globalDefault: false
 description: "Priority class for MongoDB pods"
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodb-backup-pvc
+  namespace: chat-app
+  labels:
+    app: chat-app
+    tier: database
+spec:
+  # storageClassName: rook-ceph-block
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mongodb-backup-cronjob
+  namespace: chat-app
+spec:
+  schedule: "0 0 * * *" # Run every day at midnight
+  timeZone: "Asia/Kolkata"
+
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: mongodb-backup
+            image: mongo:8.0
+            command:
+                - /bin/sh
+                - -c
+                - |
+                  DATE=$(date +%Y-%m-%d)
+
+                  BACKUP_DIR="/backup/database-backup/${DATE}"
+
+                  echo "===================================="
+                  echo "MongoDB Backup Started"
+                  echo "Date: ${DATE}"
+                  echo "Directory: ${BACKUP_DIR}"
+                  echo "===================================="
+
+                  mkdir -p "${BACKUP_DIR}"
+
+                  mongodump \
+                    --host=mongodb-service \
+                    --port=27017 \
+                    --username="${MONGO_INITDB_ROOT_USERNAME}" \
+                    --password="${MONGO_INITDB_ROOT_PASSWORD}" \
+                    --authenticationDatabase=admin \
+                    --out="${BACKUP_DIR}"
+
+                  if [ $? -eq 0 ]; then
+                    echo "MongoDB backup completed successfully."
+                  else
+                    echo "MongoDB backup FAILED."
+                    exit 1
+                  fi
+
+                  echo "Backup contents:"
+                  ls -lah "${BACKUP_DIR}"
+            env:
+              - name: MONGO_INITDB_ROOT_USERNAME
+                valueFrom:
+                  secretKeyRef:
+                    name: mongodb-secret
+                    key: username
+              - name: MONGO_INITDB_ROOT_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: mongodb-secret
+                    key: password
+            volumeMounts:
+              - name: backup-volume
+                mountPath: /backup
+          restartPolicy: OnFailure
+          volumes:
+            - name: backup-volume
+              persistentVolumeClaim:
+                claimName: mongodb-backup-pvc
