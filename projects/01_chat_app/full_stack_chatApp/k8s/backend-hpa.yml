@@ -1,0 +1,22 @@
+kind: HorizontalPodAutoscaler
+apiVersion: autoscaling/v2
+metadata:
+  name: backend-hpa
+  namespace: chat-app
+
+spec:
+  scaleTargetRef: 
+    kind: Deployment
+    name: backend
+    apiVersion: apps/v1
+  minReplicas: 1
+  maxReplicas: 3
+
+  metrics:
+    - type: Resource
+      resource: 
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 5
+ 
